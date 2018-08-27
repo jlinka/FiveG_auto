@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% import "_macros.html"as macros %}
+
+{% block title %}5G舆情系统{% endblock %}
+{% block head %}
+{{ super() }}
+<style type="text/css">
+p{
+text-indent: 2em; /*em是相对单位，2em即现在一个字大小的两倍*/
+text-align: justify;
+font-style: normal;
+line-height: 40px;
+}
+
+</style>
+{% endblock %}<!--先执行父模板-->
+{% block content %}
+<br>
+    <div class="container">
+        <div class="jumbotron">
+            <form method="POST" action="{{ url_for('main.search') }}" >
+                {{ newsform.news.label }}{{ newsform.news(class="form-control",required='',placeholder="请输入任务名字") }}<br>
+                {{ newsform.submit(class="btn btn-primary",id='finish',onclick="getLoading()") }}
+            </form>
+
+
+        </div>
+        <div>
+            <form enctype=multipart/form-data>
+                {% for news in data %}
+                    <tr>
+                        <td>{{ news.title }}</td><br>
+
+                    </tr>
+                {% endfor %}
+                {% for news in pagination.items %}
+                    <tr>
+                        <td>{{ news.title }}</td>
+                        <td>{{ news.content }}</td>
+                        <td>{{ news.url }}</td>
+
+                    </tr>
+                    <br></br>
+                {% endfor %}
+            </form>
+        {% if pagination %}
+            <div class="pagination">
+                {{ macros.pagination_widget(pagination, 'main.searchNews') }}
+            </div>
+        {% endif %}
+        </div>
+    </div>
+</br>
+
+
+
+
+
+{% endblock %}

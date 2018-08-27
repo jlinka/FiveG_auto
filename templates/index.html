@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}5G舆情系统{% endblock %}
+{% block head %}
+{{ super() }}
+<style type="text/css">
+p{
+text-indent: 2em; /*em是相对单位，2em即现在一个字大小的两倍*/
+text-align: justify;
+font-style: normal;
+line-height: 40px;
+}
+
+</style>
+{% endblock %}<!--先执行父模板-->
+{% block content %}
+<br>
+    <div class="container">
+        <div class="jumbotron">
+            <h1 align="center">欢迎来到5G舆情系统！</h1>
+        </div>
+    </div>
+    <div class="container">
+        <form method="POST" action="{{ url_for('main.searchNews') }}" >
+            {{ search.submit(class="btn btn-primary btn-lg btn-block",id='finish',onclick="getLoading()") }}
+        </form>
+    </div>
+
+
+{% endblock %}
