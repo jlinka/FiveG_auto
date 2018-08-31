@@ -5,9 +5,9 @@
 # @File    : views.py
 
 from . import main
-from flask import render_template, redirect, request, url_for
+from flask import render_template, redirect, request, url_for, session
 from app.form import Search, NewsForm
-from app.main.search import searchAll, PaginateLeave, searchCondition
+from app.main.search import searchAll, PaginateLeave, searchCondition, searchWeb
 
 
 @main.route('/searchNews', methods=['GET', 'POST'])
@@ -15,29 +15,37 @@ def searchNews():
     search = Search()
     newsform = NewsForm()
     page = int(request.args.get('page')) if request.args.get('page') else 1
-    # pagesize = 10
-    # prev_page = page - 1 if page - 1 else 1
-    # next_page = page + 1
-    # if request.method == 'POST':
-    #     cursor = searchAll()
-    #     for item in cursor:
-    #         print(item['test'])
-    #     return render_template('search.html', data=cursor, search=search, newsform=newsform, prev_page=prev_page,
-    #                            next_page=next_page
-    #                            , page=page)
-    # return render_template('search.html')
+    keywords = request.form.get('news')
+    if keywords:
+        pagination = PaginateLeave(page, searchCondition(keywords))
+        posts = pagination.items
+        return render_template('search.html', newsform=newsform, posts=posts, pagination=pagination, keywords=keywords,
+                               web=searchWeb())
+
     pagination = PaginateLeave(page, searchAll())
     posts = pagination.items
-    return render_template('search.html', newsform=newsform, posts=posts, pagination=pagination, search=search)
+    return render_template('search.html', newsform=newsform, posts=posts, pagination=pagination, search=search,
+                           web=searchWeb())
 
 
 @main.route('/search', methods=['GET', 'POST'])
 def search():
     newsform = NewsForm()
     page = int(request.args.get('page')) if request.args.get('page') else 1
-
     if request.method == 'POST':
         keywords = request.form.get('news')
-        pagination = PaginateLeave(page, searchCondition(keywords))
+        source = request.form.getlist('source')
+        session['source'] = source
+        session['keywords'] = keywords
+        pagination = PaginateLeave(page, searchCondition(keywords, source))
         posts = pagination.items
-        return render_template('search.html', newsform=newsform, posts=posts, pagination=pagination, keywords=keywords)
+        return render_template('search.html', newsform=newsform, posts=posts, pagination=pagination, keywords=keywords,
+                               web=searchWeb())
+
+    if request.method == 'GET':
+        keywords = session['keywords']
+        source = session['source']
+        pagination = PaginateLeave(page, searchCondition(keywords, source))
+        posts = pagination.items
+        return render_template('search.html', newsform=newsform, posts=posts, pagination=pagination, keywords=keywords,
+                               web=searchWeb())

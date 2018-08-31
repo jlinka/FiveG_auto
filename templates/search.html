@@ -4,15 +4,42 @@
 {% block title %}5G舆情系统{% endblock %}
 {% block head %}
 {{ super() }}
+
+
 <style type="text/css">
-p{
-text-indent: 2em; /*em是相对单位，2em即现在一个字大小的两倍*/
-text-align: justify;
-font-style: normal;
-line-height: 40px;
-}
+    p{
+        text-indent: 2em; /*em是相对单位，2em即现在一个字大小的两倍*/
+        text-align: justify;
+        font-style: normal;
+        line-height: 40px;
+    }
+
+    .longtext {
+        overflow:hidden;
+        text-overflow:ellipsis;
+        white-space: normal;
+        display: -webkit-box;-webkit-line-clamp: 5;
+        -webkit-box-orient: vertical;
+
+    }
+
+    .title{
+        float: left;
+        {#font-size: 30px;#}
+        width: 60%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        color: #666;
+        font-weight: 600
+    }
+
+
+
 
 </style>
+
+
 {% endblock %}<!--先执行父模板-->
 {% block content %}
 <br>
@@ -20,40 +47,49 @@ line-height: 40px;
         <div class="jumbotron">
             <form method="POST" action="{{ url_for('main.search') }}" >
                 {{ newsform.news.label }}{{ newsform.news(class="form-control",required='',placeholder="请输入任务名字") }}<br>
-                {{ newsform.submit(class="btn btn-primary",id='finish',onclick="getLoading()") }}
+                <label class="checkbox-inline">
+                    <input type="checkbox" name="source" value="微信公众号"/>微信公众号
+                </label>
+                <label class="checkbox-inline">
+                    <input type="checkbox" name="source" value="网站"/>网站
+                </label>
+                <br>
+                <br>
+                {% for web_b in web %}
+                    <label class="checkbox-inline">
+                    <input type="checkbox" name="source" value="{{ web_b }}"/>{{ web_b }}
+                    </label>
+                {% endfor %}
+                {{ newsform.submit(class="btn btn-primary",id='finish',onclick="getLoading()") }}<br>
             </form>
-
-
         </div>
+
+
+
+
+
         <div>
             <form enctype=multipart/form-data>
-                {% for news in data %}
-                    <tr>
-                        <td>{{ news.title }}</td><br>
-
-                    </tr>
-                {% endfor %}
                 {% for news in pagination.items %}
-                    <tr>
-                        <td>{{ news.title }}</td>
-                        <td>{{ news.content }}</td>
-                        <td>{{ news.url }}</td>
+                    <br>
+                        <td><h2 class="title">{{ news.title }}</h2></td><br>
+                        <td>{{ news.createTime }}</td>
+                        <td>来源：{{ news.source }}</td>
+                        <div class="longtext" style="width: 1000px;">
+                            <td id="content">{{ news.content }}</td>
+                        </div>
 
+                        <td><a href="{{ news.url }}">原文链接</a></td>
                     </tr>
-                    <br></br>
+                    <br>
                 {% endfor %}
             </form>
         {% if pagination %}
             <div class="pagination">
-                {{ macros.pagination_widget(pagination, 'main.searchNews') }}
+                {{ macros.pagination_widget(pagination, 'main.search') }}
             </div>
         {% endif %}
         </div>
     </div>
 </br>
-
-
-
-
-
 {% endblock %}
