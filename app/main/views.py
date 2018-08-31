@@ -7,7 +7,7 @@
 from . import main
 from flask import render_template, redirect, request, url_for, session
 from app.form import Search, NewsForm
-from app.main.search import searchAll, PaginateLeave, searchCondition, searchWeb
+from app.main.search import searchAll, PaginateLeave, searchCondition, searchWeb, searchOfficialAccounts
 
 
 @main.route('/searchNews', methods=['GET', 'POST'])
@@ -20,12 +20,12 @@ def searchNews():
         pagination = PaginateLeave(page, searchCondition(keywords))
         posts = pagination.items
         return render_template('search.html', newsform=newsform, posts=posts, pagination=pagination, keywords=keywords,
-                               web=searchWeb())
+                               web=searchWeb(), officialAccounts=searchOfficialAccounts())
 
     pagination = PaginateLeave(page, searchAll())
     posts = pagination.items
     return render_template('search.html', newsform=newsform, posts=posts, pagination=pagination, search=search,
-                           web=searchWeb())
+                           web=searchWeb(), officialAccounts=searchOfficialAccounts())
 
 
 @main.route('/search', methods=['GET', 'POST'])
@@ -40,7 +40,7 @@ def search():
         pagination = PaginateLeave(page, searchCondition(keywords, source))
         posts = pagination.items
         return render_template('search.html', newsform=newsform, posts=posts, pagination=pagination, keywords=keywords,
-                               web=searchWeb())
+                               web=searchWeb(), officialAccounts=searchOfficialAccounts())
 
     if request.method == 'GET':
         keywords = session['keywords']
@@ -48,4 +48,4 @@ def search():
         pagination = PaginateLeave(page, searchCondition(keywords, source))
         posts = pagination.items
         return render_template('search.html', newsform=newsform, posts=posts, pagination=pagination, keywords=keywords,
-                               web=searchWeb())
+                               web=searchWeb(), officialAccounts=searchOfficialAccounts())

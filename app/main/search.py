@@ -113,10 +113,13 @@ class PaginateLeave:
 
 
 def searchAll():
+    # 新建MongoDB类
     db = mongDbManger_web_showClass()
+    # 链接数据库
     db.connect('server21.raisound.com', 24000, "webuser", "webuser1957", "web_show", "xinChuang_topic", "web_show")
+    # 查询所有结果并按照时间降序排序
     cursor = db.find().sort('createTime', -1)
-
+    # 关闭游标
     cursor.close()
     return cursor
 
@@ -142,11 +145,25 @@ def searchWeb():
     beg_web = []
     for i in cursor:
         beg_web.append(i['source'])
+    beg_web.remove("微信公众号")
     web = set(beg_web)
     cursor.close()
     return web
 
 
+def searchOfficialAccounts():
+    db = mongDbManger_web_showClass()
+    db.connect('server21.raisound.com', 24000, "webuser", "webuser1957", "web_show", "xinChuang_topic", "web_show")
+    cursor = db.find().sort('createTime', -1)
+    officialAccounts = []
+    for i in cursor:
+        if i['source'] =="微信公众号":
+            officialAccounts.append(i['auther'])
+
+    officialAccounts = set(officialAccounts)
+
+    cursor.close()
+    return officialAccounts
 
 
 if __name__ == '__main__':
@@ -156,5 +173,5 @@ if __name__ == '__main__':
     #     print(i['title'])
     # for i in a:
     #     print(i['title'])
-    a = searchWeb()
+    a = searchOfficialAccounts()
     print(a)

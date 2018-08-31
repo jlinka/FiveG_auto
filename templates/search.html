@@ -55,11 +55,20 @@
                 </label>
                 <br>
                 <br>
+                网站
                 {% for web_b in web %}
                     <label class="checkbox-inline">
                     <input type="checkbox" name="source" value="{{ web_b }}"/>{{ web_b }}
                     </label>
                 {% endfor %}
+                <br><br><br>
+                微信公众号
+                {% for acc in officialAccounts %}
+                    <label class="checkbox-inline">
+                    <input type="checkbox" name="source" value="{{ acc }}"/>{{ acc }}
+                    </label>
+                {% endfor %}
+                <br><br><br>
                 {{ newsform.submit(class="btn btn-primary",id='finish',onclick="getLoading()") }}<br>
             </form>
         </div>
