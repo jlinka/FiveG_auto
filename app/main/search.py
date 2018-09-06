@@ -6,6 +6,7 @@
 
 
 from pymongo import MongoClient
+from bson.objectid import ObjectId
 
 web = ['C114中国通信网', '中华人民共和国工业和信息化部', '中华人民共和国发展和改革委员会', '中华人民共和国科学技术部',
        '中华人民共和国商务部', '深圳市发展和改革委员会', 'ITU', 'ITU中国', '3GPP', 'IMT-2020推进组', '通信世界网',
@@ -43,23 +44,55 @@ class mongDbManger_web_showClass:
         cursor = self.__coll.find({"test": {'$exists': True}, 'isLimitSource': 1})
         return cursor
 
-    def findlike(self, filter, source):
+    def findSource(self):
+        # cursor = self.__coll.find({"test": {'$exists': True}, 'isLimitSource': 1}, {"source": 1, "_id": 0})
+        cursor = self.__coll.distinct('source', {"test": {'$exists': True}, 'isLimitSource': 1})
+        return cursor
+
+    def findAuther(self):
+        # cursor = self.__coll.find({"test": {'$exists': True}, 'isLimitSource': 1}, {"auther": 1, "_id": 0})
+        cursor = self.__coll.distinct('auther', {"test": {'$exists': True}, 'isLimitSource': 1})
+        return cursor
+
+    def findlike(self, filter, source, webs, auther):
         test_dict = {}
         source_list = []
         test_dict["test"] = {'$exists': True}
         test_dict['isLimitSource'] = 1
-        test_dict[list(filter.keys())[0]] = list(filter.values())[0]
+        if filter['content']['$regex'] != '':
+            test_dict[list(filter.keys())[0]] = list(filter.values())[0]
         if source:
             for i in source:
                 source_list.append(i)
                 # test_dict['source'] = i
                 if i == '网站':
-                    for j in web:
-                        source_list.append(j)
+                    source_list.extend(web)
             test_dict['source'] = {'$in': source_list}
+        else:
+            if webs and auther:
+                test_dict['$or'] = [{'source': {'$in': webs}},
+                                    {'auther': {'$in': auther}}]
+            if len(webs) != 0 and len(auther) == 0:
+                test_dict['source'] = {'$in': webs}
+            if len(webs) == 0 and len(auther) != 0:
+                test_dict['auther'] = {'$in': auther}
+            # test_dict['source'] = {'$in': webs}
+            # test_dict['auther'] = {'$in': auther}
 
         cursor = self.__coll.find(test_dict)
+        cursor.close()
         return cursor
+
+    def findOne(self, filter):
+        cursor = self.__coll.find_one({'_id': ObjectId(filter)})
+        cursor.close()
+        return cursor
+
+    def test(self, test_dict):
+        cursor = db.__coll.find(test_dict)
+        for i in cursor:
+            print(i['source'])
+            print(i['auther'])
 
 
 class PaginateLeave:
@@ -90,9 +123,9 @@ class PaginateLeave:
         for i in range(self.current_num):
             yes_time = str(leave[self.prev_num * 10 + i].get('createTime'))
             yes_time = "".join(str(yes_time[0:4]) + "年" + str(yes_time[4:6]) + "月" + str(yes_time[6:8])) + "日"
-            print(yes_time)
             self.items.append(
-                {'title': leave[self.prev_num * 10 + i].get('title'),
+                {'ObjectId': leave[self.prev_num * 10 + i].get('_id'),
+                 'title': leave[self.prev_num * 10 + i].get('title'),
                  # 'createTime': leave[self.prev_num * 10 + i].get('createTime'),
                  'createTime': yes_time,
                  'content': leave[self.prev_num * 10 + i].get('content'),
@@ -112,66 +145,91 @@ class PaginateLeave:
                 last = num
 
 
+db = mongDbManger_web_showClass()
+db.connect('server21.raisound.com', 24000, "webuser", "webuser1957", "web_show", "xinChuang_topic", "web_show")
+
+
 def searchAll():
     # 新建MongoDB类
-    db = mongDbManger_web_showClass()
+
     # 链接数据库
-    db.connect('server21.raisound.com', 24000, "webuser", "webuser1957", "web_show", "xinChuang_topic", "web_show")
+
     # 查询所有结果并按照时间降序排序
     cursor = db.find().sort('createTime', -1)
     # 关闭游标
     cursor.close()
+    db.closeMongo()
     return cursor
 
 
-def searchCondition(keyword, source):
-    db = mongDbManger_web_showClass()
-    db.connect('server21.raisound.com', 24000, "webuser", "webuser1957", "web_show", "xinChuang_topic", "web_show")
+def searchCondition(keyword, source, web, auther):
+    # db.connect('server21.raisound.com', 24000, "webuser", "webuser1957", "web_show", "xinChuang_topic", "web_show")
     filter = {}
     keyword = keyword
     condition = {}
     condition['$regex'] = keyword
     filter["content"] = condition
     # cursor = db.find(filter)
-    cursor = db.findlike(filter, source).sort('createTime', -1)
+    cursor = db.findlike(filter, source, web, auther).sort('createTime', -1)
     cursor.close()
+    db.closeMongo()
     return cursor
 
 
 def searchWeb():
-    db = mongDbManger_web_showClass()
-    db.connect('server21.raisound.com', 24000, "webuser", "webuser1957", "web_show", "xinChuang_topic", "web_show")
-    cursor = db.find().sort('createTime', -1)
-    beg_web = []
-    for i in cursor:
-        beg_web.append(i['source'])
-    beg_web.remove("微信公众号")
-    web = set(beg_web)
-    cursor.close()
-    return web
+    # db.connect('server21.raisound.com', 24000, "webuser", "webuser1957", "web_show", "xinChuang_topic", "web_show")
+    cursor = db.findSource()
+    cursor.remove("微信公众号")
+    # beg_web = []
+    # for i in cursor:
+    #     beg_web.append(i['source'])
+    # beg_web.remove("微信公众号")
+    # web = set(beg_web)
+    db.closeMongo()
+    return cursor
 
 
 def searchOfficialAccounts():
-    db = mongDbManger_web_showClass()
-    db.connect('server21.raisound.com', 24000, "webuser", "webuser1957", "web_show", "xinChuang_topic", "web_show")
-    cursor = db.find().sort('createTime', -1)
-    officialAccounts = []
-    for i in cursor:
-        if i['source'] =="微信公众号":
-            officialAccounts.append(i['auther'])
+    # db.connect('server21.raisound.com', 24000, "webuser", "webuser1957", "web_show", "xinChuang_topic", "web_show")
+    cursor = db.findAuther()
+    # officialAccounts = []
+    # for i in cursor:
+    #     if i['source'] == "微信公众号":
+    #         officialAccounts.append(i['auther'])
+    # officialAccounts = set(officialAccounts)
+    # cursor.close()
+    db.closeMongo()
+    return cursor
 
-    officialAccounts = set(officialAccounts)
 
-    cursor.close()
-    return officialAccounts
+def findObjectId(keywords):
+    # db.connect('server21.raisound.com', 24000, "webuser", "webuser1957", "web_show", "xinChuang_topic", "web_show")
+    cursor = db.findOne(keywords)
+    db.closeMongo()
+    return cursor
 
 
 if __name__ == '__main__':
-    # a = searchCondition('3GPP', [])
+    # # a = searchCondition('3GPP', [])
     # b = searchAll()
     # for i in b:
-    #     print(i['title'])
+    #     print(i)
     # for i in a:
     #     print(i['title'])
-    a = searchOfficialAccounts()
-    print(a)
+    # a = searchOfficialAccounts()
+    # print(a)
+    # a = findObjectId('000000000000000094890126')
+    # print(a)
+    # a = ['微信公众号']
+    # a.extend(web)
+    # print(a)
+    # db = mongDbManger_web_showClass()
+    # db.connect('server21.raisound.com', 24000, "webuser", "webuser1957", "web_show", "xinChuang_topic", "web_show")
+    # test_dict = {'test': {'$exists': True}, 'isLimitSource': 1, '$or': [{'source': {'$in': ['C114中国通信网']}},
+    #                                                                     {'auther': {'$in': ['Qualcomm中国']}}]}
+    # # test_dict = {'source': 'C114中国通信网'}
+    # db.test(test_dict)
+
+    a = db.findSource()
+    for i in a:
+        print(i)

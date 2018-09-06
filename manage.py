@@ -32,7 +32,6 @@ def internal_server_error(e):
 
 @app.route('/')
 def hello_world():
-    print('aaa')
     search = Search()
     return render_template('index.html', search=search)
 

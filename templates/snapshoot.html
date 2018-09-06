@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% import "_macros.html"as macros %}
+
+{% block title %}5G舆情系统{% endblock %}
+{% block head %}
+    {{ super() }}
+
+
+    <style type="text/css">
+        p {
+            text-indent: 2em; /*em是相对单位，2em即现在一个字大小的两倍*/
+            text-align: justify;
+            font-style: normal;
+            line-height: 40px;
+        }
+
+        .longtext {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: normal;
+            display: -webkit-box;
+            -webkit-line-clamp: 5;
+            -webkit-box-orient: vertical;
+
+        }
+
+        .title {
+            float: left;
+        {#font-size: 30px;#} width: 60%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            color: #666;
+            font-weight: 600
+        }
+    </style>
+
+
+{% endblock %}<!--先执行父模板-->
+{% block content %}
+    <br>
+    <div class="container">
+        {{ news.title }}<br><br>
+        {{ news.createTime }}<br><br>
+        {{ news.auther }}<br><br>
+        {{ news.content }}
+    </div>
+    </br>
+{% endblock %}

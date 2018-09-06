@@ -3,102 +3,144 @@
 
 {% block title %}5G舆情系统{% endblock %}
 {% block head %}
-{{ super() }}
+    {{ super() }}
 
 
-<style type="text/css">
-    p{
-        text-indent: 2em; /*em是相对单位，2em即现在一个字大小的两倍*/
-        text-align: justify;
-        font-style: normal;
-        line-height: 40px;
-    }
+    <style type="text/css">
+        p {
+            text-indent: 2em; /*em是相对单位，2em即现在一个字大小的两倍*/
+            text-align: justify;
+            font-style: normal;
+            line-height: 40px;
+        }
 
-    .longtext {
-        overflow:hidden;
-        text-overflow:ellipsis;
-        white-space: normal;
-        display: -webkit-box;-webkit-line-clamp: 5;
-        -webkit-box-orient: vertical;
+        .longtext {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: normal;
+            display: -webkit-box;
+            -webkit-line-clamp: 5;
+            -webkit-box-orient: vertical;
 
-    }
-
-    .title{
-        float: left;
-        {#font-size: 30px;#}
-        width: 60%;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        color: #666;
-        font-weight: 600
-    }
-
-
-
-
-</style>
+        }
+       .checkbox-inline{
+       	 width:220px;
+	 margin:0!important;
+       }
+        .title {
+            float: left;
+        {#font-size: 30px;#} width: 60%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            color: #666;
+            font-weight: 600
+        }
+    </style>
 
 
 {% endblock %}<!--先执行父模板-->
 {% block content %}
-<br>
+    <br>
     <div class="container">
         <div class="jumbotron">
-            <form method="POST" action="{{ url_for('main.search') }}" >
-                {{ newsform.news.label }}{{ newsform.news(class="form-control",required='',placeholder="请输入任务名字") }}<br>
-                <label class="checkbox-inline">
+            <form method="POST" action="{{ url_for('main.search') }}">
+                {{ newsform.news.label }}{{ newsform.news(class="form-control") }}<br>
+		<a class="btn btn-link" role="button" data-toggle="collapse" href="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+			  筛选
+		</a>
+		<div class="collapse" id="collapseExample">
+                <!--<label class="checkbox-inline">
                     <input type="checkbox" name="source" value="微信公众号"/>微信公众号
                 </label>
                 <label class="checkbox-inline">
                     <input type="checkbox" name="source" value="网站"/>网站
                 </label>
                 <br>
-                <br>
-                网站
+		<br>-->
+		<div class="row" id="web">
+			<div class="col-md-1">
+			网站
+			<br/>
+			<a class="btn btn-link" id="select_web">全选</a> 
+			</div>
+			<div class="col-md-11">	
                 {% for web_b in web %}
                     <label class="checkbox-inline">
-                    <input type="checkbox" name="source" value="{{ web_b }}"/>{{ web_b }}
+                        <input type="checkbox" name="web" value="{{ web_b }}"/>{{ web_b }}
                     </label>
                 {% endfor %}
+			</div>
+		</div>
                 <br><br><br>
+<div class="row" id="weixin">
+			<div class="col-md-1">
+
                 微信公众号
+		<br/
+		<a class="btn btn-link" id="select_weixin">全选</a> 
+		  </div>
+		                          <div class="col-md-11"> 
                 {% for acc in officialAccounts %}
                     <label class="checkbox-inline">
-                    <input type="checkbox" name="source" value="{{ acc }}"/>{{ acc }}
+                        <input type="checkbox" name="auther" value="{{ acc }}"/>{{ acc }} {#不是我故意拼错的author#}
                     </label>
                 {% endfor %}
+					  </div>
+</div>
+		</div>
                 <br><br><br>
                 {{ newsform.submit(class="btn btn-primary",id='finish',onclick="getLoading()") }}<br>
             </form>
         </div>
-
-
-
-
-
         <div>
-            <form enctype=multipart/form-data>
+		<td>关键词：{{ session['keywords'] }}</td>
+            	<td>网站：{{ session['web'] }}</td>
+            	<td>公众号：{{ session['auther'] }}</td>
+		<form enctype=multipart/form-data>
                 {% for news in pagination.items %}
                     <br>
-                        <td><h2 class="title">{{ news.title }}</h2></td><br>
-                        <td>{{ news.createTime }}</td>
-                        <td>来源：{{ news.source }}</td>
-                        <div class="longtext" style="width: 1000px;">
-                            <td id="content">{{ news.content }}</td>
-                        </div>
-
+                    <td><h2 class="title">{{ news.title }}</h2></td><br>
+                    <td>{{ news.createTime }}</td>
+                    <td>来源：{{ news.source }}</td>
+                    <td>作者：{{ news.auther }}</td>
+                    <div class="longtext" style="width: 1000px;">
+                        <td id="content">{{ news.content }}</td>
+                    </div>
+                    {% if news.source =="微信公众号" %}
+                        <td><a href="{{ url_for('main.snapshoot', ObjectId =news.ObjectId) }}">快照</a></td>
+                    {% endif %}
+                    {% if news.source != "微信公众号" %}
                         <td><a href="{{ news.url }}">原文链接</a></td>
+                    {% endif %}
                     </tr>
                     <br>
                 {% endfor %}
             </form>
-        {% if pagination %}
-            <div class="pagination">
-                {{ macros.pagination_widget(pagination, 'main.search') }}
-            </div>
-        {% endif %}
+            {% if pagination %}
+                <div class="pagination">
+                    {{ macros.pagination_widget(pagination, 'main.search') }}
+                </div>
+            {% endif %}
         </div>
     </div>
-</br>
+    </br>
+
+    <script>
+	$(function(){});
+	    $("#select_web").click(function(){
+		if($(this).attr('checked')){
+		var web = $("input[name='web']");
+		web.each(function(){
+			$(this).attr('checked',true);
+		});
+		}else{
+		var web = $("input[name='web']");
+		web.each(function(){
+		$(this).attr('checked',false);
+		});
+		}
+	});
+    </script>
 {% endblock %}
+

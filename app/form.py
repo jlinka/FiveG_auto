@@ -10,15 +10,11 @@ from wtforms.validators import Required, URL, Email
 
 
 class Search(Form):
-    searchName = StringField('任务名字', validators=[Required(message='此项不能为空')])
+    searchName = StringField('任务名字')
     submit = SubmitField('搜索')
 
 
 class NewsForm(Form):
-    news = StringField('搜索内容', validators=[Required(message='此项不能为空')])
-    hobby = SelectMultipleField('Hobby', choices=[
-        ('swim', 'Swimming'),
-        ('skate', 'Skating'),
-        ('hike', 'Hiking')
-    ])
+    news = StringField('搜索内容')
+
     submit = SubmitField('SEARCH')
