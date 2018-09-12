@@ -8,13 +8,14 @@
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 
-web = ['C114中国通信网', '中华人民共和国工业和信息化部', '中华人民共和国发展和改革委员会', '中华人民共和国科学技术部',
-       '中华人民共和国商务部', '深圳市发展和改革委员会', 'ITU', 'ITU中国', '3GPP', 'IMT-2020推进组', '通信世界网',
-       'OFweek光通讯网', '中国无线电管理', '电子发烧友', '电子产品世界', '新华网信息化', '新浪新闻', '新浪科技',
-       '新浪财经', '网易科技', '网易财经', '搜狐', '搜狐科技', '腾讯财经', '腾讯科技', '凤凰网', '凤凰科技', '21CN科技',
-       '环球科技', '飞象网', '中国科技网', '智通财经', 'CSDN', '和讯网', '华为', '中兴通讯', '上海诺基亚贝尔', '爱立信',
-       '大唐电信', '三星', '英特尔', '英特尔IQ', '高通Qualcomm', '中国移动设计院', '中国移动设计院', '中国联通研究院',
-       '中国电信北京研究院', '中国信通院']
+
+# web = ['C114中国通信网', '中华人民共和国工业和信息化部', '中华人民共和国发展和改革委员会', '中华人民共和国科学技术部',
+#        '中华人民共和国商务部', '深圳市发展和改革委员会', 'ITU', 'ITU中国', '3GPP', 'IMT-2020推进组', '通信世界网',
+#        'OFweek光通讯网', '中国无线电管理', '电子发烧友', '电子产品世界', '新华网信息化', '新浪新闻', '新浪科技',
+#        '新浪财经', '网易科技', '网易财经', '搜狐', '搜狐科技', '腾讯财经', '腾讯科技', '凤凰网', '凤凰科技', '21CN科技',
+#        '环球科技', '飞象网', '中国科技网', '智通财经', 'CSDN', '和讯网', '华为', '中兴通讯', '上海诺基亚贝尔', '爱立信',
+#        '大唐电信', '三星', '英特尔', '英特尔IQ', '高通Qualcomm', '中国移动设计院', '中国移动设计院', '中国联通研究院',
+#        '中国电信北京研究院', '中国信通院']
 
 
 class mongDbManger_web_showClass:
@@ -51,7 +52,7 @@ class mongDbManger_web_showClass:
 
     def findAuther(self):
         # cursor = self.__coll.find({"test": {'$exists': True}, 'isLimitSource': 1}, {"auther": 1, "_id": 0})
-        cursor = self.__coll.distinct('auther', {"test": {'$exists': True}, 'isLimitSource': 1})
+        cursor = self.__coll.distinct('auther', {"test": {'$exists': True}, 'isLimitSource': 1, 'source': "微信公众号"})
         return cursor
 
     def findlike(self, filter, source, webs, auther):
@@ -85,7 +86,6 @@ class mongDbManger_web_showClass:
 
     def findOne(self, filter):
         cursor = self.__coll.find_one({'_id': ObjectId(filter)})
-        cursor.close()
         return cursor
 
     def test(self, test_dict):
@@ -150,11 +150,6 @@ db.connect('server21.raisound.com', 24000, "webuser", "webuser1957", "web_show",
 
 
 def searchAll():
-    # 新建MongoDB类
-
-    # 链接数据库
-
-    # 查询所有结果并按照时间降序排序
     cursor = db.find().sort('createTime', -1)
     # 关闭游标
     cursor.close()
@@ -163,13 +158,11 @@ def searchAll():
 
 
 def searchCondition(keyword, source, web, auther):
-    # db.connect('server21.raisound.com', 24000, "webuser", "webuser1957", "web_show", "xinChuang_topic", "web_show")
     filter = {}
     keyword = keyword
     condition = {}
     condition['$regex'] = keyword
     filter["content"] = condition
-    # cursor = db.find(filter)
     cursor = db.findlike(filter, source, web, auther).sort('createTime', -1)
     cursor.close()
     db.closeMongo()
@@ -177,59 +170,25 @@ def searchCondition(keyword, source, web, auther):
 
 
 def searchWeb():
-    # db.connect('server21.raisound.com', 24000, "webuser", "webuser1957", "web_show", "xinChuang_topic", "web_show")
     cursor = db.findSource()
     cursor.remove("微信公众号")
-    # beg_web = []
-    # for i in cursor:
-    #     beg_web.append(i['source'])
-    # beg_web.remove("微信公众号")
-    # web = set(beg_web)
     db.closeMongo()
     return cursor
 
 
 def searchOfficialAccounts():
-    # db.connect('server21.raisound.com', 24000, "webuser", "webuser1957", "web_show", "xinChuang_topic", "web_show")
     cursor = db.findAuther()
-    # officialAccounts = []
-    # for i in cursor:
-    #     if i['source'] == "微信公众号":
-    #         officialAccounts.append(i['auther'])
-    # officialAccounts = set(officialAccounts)
-    # cursor.close()
     db.closeMongo()
     return cursor
 
 
 def findObjectId(keywords):
-    # db.connect('server21.raisound.com', 24000, "webuser", "webuser1957", "web_show", "xinChuang_topic", "web_show")
     cursor = db.findOne(keywords)
     db.closeMongo()
     return cursor
 
 
 if __name__ == '__main__':
-    # # a = searchCondition('3GPP', [])
-    # b = searchAll()
-    # for i in b:
-    #     print(i)
-    # for i in a:
-    #     print(i['title'])
-    # a = searchOfficialAccounts()
-    # print(a)
-    # a = findObjectId('000000000000000094890126')
-    # print(a)
-    # a = ['微信公众号']
-    # a.extend(web)
-    # print(a)
-    # db = mongDbManger_web_showClass()
-    # db.connect('server21.raisound.com', 24000, "webuser", "webuser1957", "web_show", "xinChuang_topic", "web_show")
-    # test_dict = {'test': {'$exists': True}, 'isLimitSource': 1, '$or': [{'source': {'$in': ['C114中国通信网']}},
-    #                                                                     {'auther': {'$in': ['Qualcomm中国']}}]}
-    # # test_dict = {'source': 'C114中国通信网'}
-    # db.test(test_dict)
-
     a = db.findSource()
     for i in a:
         print(i)

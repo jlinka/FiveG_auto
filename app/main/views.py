@@ -19,13 +19,6 @@ def searchNews():
     session['web'] = ''
     session['auther'] = ''
     page = int(request.args.get('page')) if request.args.get('page') else 1
-    # keywords = request.form.get('news')
-    # if keywords:
-    #     pagination = PaginateLeave(page, searchCondition(keywords))
-    #     posts = pagination.items
-    #     return render_template('search.html', newsform=newsform, posts=posts, pagination=pagination, keywords=keywords,
-    #                            web=searchWeb(), officialAccounts=searchOfficialAccounts())
-
     pagination = PaginateLeave(page, searchAll())
     posts = pagination.items
     web = searchWeb()
@@ -99,5 +92,4 @@ def snapshoot():
         createTime = str(news['createTime'])
         news['createTime'] = "".join(str(createTime[0:4]) + "年" + str(createTime[4:6]) + "月" + str(
             createTime[6:8])) + "日"
-        print(news)
         return render_template('snapshoot.html', news=news)
