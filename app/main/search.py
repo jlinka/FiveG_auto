@@ -7,6 +7,8 @@
 
 from pymongo import MongoClient
 from bson.objectid import ObjectId
+from app.main.complex_search import kmeans_search_condition
+import jieba
 
 
 # web = ['C114中国通信网', '中华人民共和国工业和信息化部', '中华人民共和国发展和改革委员会', '中华人民共和国科学技术部',
@@ -67,7 +69,7 @@ class mongDbManger_web_showClass:
                 source_list.append(i)
                 # test_dict['source'] = i
                 if i == '网站':
-                    source_list.extend(web)
+                    source_list.extend(webs)
             test_dict['source'] = {'$in': source_list}
         else:
             if webs and auther:
@@ -152,18 +154,21 @@ db.connect('server21.raisound.com', 24000, "webuser", "webuser1957", "web_show",
 def searchAll():
     cursor = db.find().sort('createTime', -1)
     # 关闭游标
-    cursor.close()
-    db.closeMongo()
+    # cursor.close()
+    # db.closeMongo()
     return cursor
 
 
-def searchCondition(keyword, source, web, auther):
+def searchCondition(keyword, source, web, auther, order):
     filter = {}
     keyword = keyword
     condition = {}
     condition['$regex'] = keyword
     filter["content"] = condition
     cursor = db.findlike(filter, source, web, auther).sort('createTime', -1)
+    if order == "智能排序":
+        pass
+    print(cursor.count())
     cursor.close()
     db.closeMongo()
     return cursor
@@ -189,6 +194,9 @@ def findObjectId(keywords):
 
 
 if __name__ == '__main__':
-    a = db.findSource()
-    for i in a:
-        print(i)
+    a = searchCondition("3GPP", "", "", "", "")
+    kmeans_search_condition(a)
+
+    # a = db.findSource()
+    # for i in a:
+    #     print(i)

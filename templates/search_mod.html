@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+{% block navbar %}
+    {{ super() }}
+{% endblock %}
+
+
+
+{% block head %}
+    {{ super() }}
+    <style type="text/css">
+        p {
+            text-indent: 2em; /*em是相对单位，2em即现在一个字大小的两倍*/
+            text-align: justify;
+            font-style: normal;
+            line-height: 40px;
+        }
+
+        .longtext {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: normal;
+            display: -webkit-box;
+            -webkit-line-clamp: 5;
+            -webkit-box-orient: vertical;
+
+        }
+
+        .checkbox-inline {
+            width: 220px;
+            margin: 0 !important;
+        }
+
+        .title {
+            float: left;
+        {#font-size: 30px;#} width: 60%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            color: #666;
+            font-weight: 600
+        }
+    </style>
+{% endblock %}
+{% block content %}
+
+    <br>
+    <div class="container">
+        <div class="jumbotron">
+            <form method="POST" action="{{ url_for('main.search') }}">
+                <div class="input-group">{{ newsform.news(class="form-control") }}
+                    <div class="input-group-btn">
+
+                        {{ newsform.submit(class="btn btn-primary",id='finish',onclick="getLoading()") }}<br>
+                    </div>
+                </div>
+                <div style="width:100px;margin:0 auto;text-align:center;padding:10px 0">
+                    <a class="btn btn-info" id="filter">
+                        筛选
+                    </a>
+                </div>
+                <div class="collapse" id="collapseExample">
+                    <!--<label class="checkbox-inline">
+                        <input type="checkbox" name="source" value="微信公众号"/>微信公众号
+                    </label>
+                    <label class="checkbox-inline">
+                        <input type="checkbox" name="source" value="网站"/>网站
+                    </label>
+                    <br>
+            <br>-->
+                    <div class="row" id="web">
+                        <div class="col-md-2">
+                            网站
+                            <br/>
+
+                            <label class="checkbox-inline" id="select_web">
+                                <input type="checkbox" value=""/>全选
+                            </label>
+                        </div>
+                        <div class="col-md-10">
+                            {% for web_b in web %}
+                                <label class="checkbox-inline">
+                                    <input type="checkbox" name="web" value="{{ web_b }}"/>{{ web_b }}
+                                </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <br><br><br>
+                    <div class="row" id="weixin">
+                        <div class="col-md-2">
+
+                            微信公众号
+                            <br/>
+
+                            <label class="checkbox-inline" id="select_weixin">
+                                <input type="checkbox" value=""/>全选
+                            </label>
+                        </div>
+                        <div class="col-md-10">
+                            {% for acc in officialAccounts %}
+                                <label class="checkbox-inline">
+                                    <input type="checkbox" name="auther" value="{{ acc }}"/>{{ acc }} {#不是我故意拼错的author#}
+                                </label>
+                            {% endfor %}
+                        </div>
+
+                    </div>
+                    <div class="col-md-2">
+
+                        搜索模式（默认按照时间排序）
+
+                        <div>
+                            <input name="sex" value="M" type="radio" checked="checked"> 时间降序
+                        </div>
+                        <br>
+                        <div>
+                            <input name="sex" value="F" type="radio"> 智能排序
+                        </div>
+                    </div>
+                </div>
+                <br><br><br>
+            </form>
+        </div>
+    </div>
+
+
+    <script>
+        $(function () {
+            $("#select_web").click(function () {
+
+                if ($(this).find('input').is(':checked')) {
+                    var web = $("input[name='web']");
+                    web.each(function () {
+                        $(this).prop('checked', true);
+                    });
+                } else {
+                    var web = $("input[name='web']");
+                    web.each(function () {
+                        $(this).attr('checked', false);
+                    });
+                }
+            });
+
+            $("#select_weixin").click(function () {
+
+                if ($(this).find('input').is(':checked')) {
+                    var web = $("input[name='auther']");
+                    web.each(function () {
+                        $(this).prop('checked', true);
+                    });
+                } else {
+                    var web = $("input[name='auther']");
+                    web.each(function () {
+                        $(this).attr('checked', false);
+                    });
+                }
+            });
+            $('#filter').click(function () {
+                $('.collapse').collapse('toggle')
+            })
+        });
+    </script>
+{% endblock %}
+

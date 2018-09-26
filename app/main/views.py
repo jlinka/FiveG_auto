@@ -14,6 +14,7 @@ from app.main.search import searchAll, PaginateLeave, searchCondition, searchWeb
 def searchNews():
     search = Search()
     newsform = NewsForm()
+    session['order'] = ''
     session['source'] = ''  # 清理session
     session['keywords'] = ''  # 清理session，不清理很严重啊，如果有更好的方法请告知，想不到方法保存条件了
     session['web'] = ''
@@ -33,17 +34,19 @@ def search():
     search = Search()
     page = int(request.args.get('page')) if request.args.get('page') else 1
     if request.method == 'POST':
+        order = request.values.get('order')
         keywords = request.form.get('news')
         source = request.form.getlist('source')
         web = request.form.getlist('web')
         auther = request.form.getlist('auther')
+        session['order'] = order
         session['source'] = source
         session['keywords'] = keywords
         session['web'] = web
         session['auther'] = auther
         if keywords == "" and len(source) == 0:  # 判断搜索条件为空时，显示全部新闻内容
             if web or auther:
-                pagination = PaginateLeave(page, searchCondition(keywords, source, web, auther))
+                pagination = PaginateLeave(page, searchCondition(keywords, source, web, auther, order))
                 posts = pagination.items
                 return render_template('search.html', newsform=newsform, posts=posts, pagination=pagination,
                                        keywords=keywords,
@@ -51,33 +54,37 @@ def search():
             else:
                 search = Search()
                 newsform = NewsForm()
+                session['order'] = ''
                 session['source'] = ''  # 清理session
                 session['keywords'] = ''  # 清理session，不清理很严重啊，如果有更好的方法请告知，想不到方法保存条件了
                 session['web'] = ''
                 session['auther'] = ''
                 page = int(request.args.get('page')) if request.args.get('page') else 1
+
                 pagination = PaginateLeave(page, searchAll())
                 posts = pagination.items
                 return render_template('search.html', newsform=newsform, posts=posts, pagination=pagination,
                                        search=search,
                                        web=searchWeb(), officialAccounts=searchOfficialAccounts(), session=session)
-        pagination = PaginateLeave(page, searchCondition(keywords, source, web, auther))
+        pagination = PaginateLeave(page, searchCondition(keywords, source, web, auther, order))
         posts = pagination.items
         return render_template('search.html', newsform=newsform, posts=posts, pagination=pagination, keywords=keywords,
                                web=searchWeb(), officialAccounts=searchOfficialAccounts(), session=session)
 
     if request.method == 'GET':
+        order = session['order']
         keywords = session['keywords']
         source = session['source']
         web = session['web']
         auther = session['auther']
-        if keywords == '' and source == '' and web == '' and auther == '':
+
+        if keywords == '' and source == '' and web == '' and auther == '' and order == '':
             pagination = PaginateLeave(page, searchAll())
             posts = pagination.items
             return render_template('search.html', newsform=newsform, posts=posts, pagination=pagination, search=search,
                                    web=searchWeb(), officialAccounts=searchOfficialAccounts(), session=session)
         else:
-            pagination = PaginateLeave(page, searchCondition(keywords, source, web, auther))
+            pagination = PaginateLeave(page, searchCondition(keywords, source, web, auther, order))
             posts = pagination.items
             return render_template('search.html', newsform=newsform, posts=posts, pagination=pagination,
                                    keywords=keywords,
