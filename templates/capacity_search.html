@@ -1,4 +1,3 @@
-
 {#{% extends "base.html" %}#}
 {% import "_macros.html"as macros %}
 
@@ -7,35 +6,64 @@
 
 {% block content %}
     {{ super() }}
-    <div>
-        <td>关键词：{{ session['keywords'] }}</td>
-        <td>网站：{{ session['web'] }}</td>
-        <td>公众号：{{ session['auther'] }}</td>
-        <form enctype=multipart/form-data>
-            {% for news in pagination.items %}
-                <br>
-                <td><h2 class="title">{{ news.title }}</h2></td><br>
-                <td>{{ news.createTime }}</td>
-                <td>来源：{{ news.source }}</td>
-                <td>作者：{{ news.auther }}</td>
-                <div class="longtext" style="width: 1000px;">
-                    <td id="content">{{ news.content }}</td>
-                </div>
-                {% if news.source =="微信公众号" %}
-                    <td><a href="{{ url_for('main.snapshoot', ObjectId =news.ObjectId) }}">快照</a></td>
-                {% endif %}
-                {% if news.source != "微信公众号" %}
-                    <td><a href="{{ news.url }}">原文链接</a></td>
-                {% endif %}
-                </tr>
-                <br>
-            {% endfor %}
-        </form>
-        {% if pagination %}
-            <div class="pagination">
-                {{ macros.pagination_widget(pagination, 'main.search') }}
+    <div class="container">
+        <div class="jumbotron">
+
+            <!-- Nav tabs -->
+            <ul class="nav nav-tabs" role="tablist">
+                {#                <li role="presentation" class="active"><a href="#home" aria-controls="home" role="tab"#}
+                {#                                                          data-toggle="tab">第一类</a>#}
+                {#                </li>#}
+                {% for i in range(classifi) %}
+                    <li role="presentation"><a href="#{{ i }}" aria-controls="{{ i }}" role="tab"
+                                               data-toggle="tab">第{{ i }}类</a>
+                    </li>
+                {% endfor %}
+                {#                <li role="presentation"><a href="#messages" aria-controls="messages" role="tab"#}
+                {#                                           data-toggle="tab">第三类</a></li>#}
+                {#                <li role="presentation"><a href="#settings" aria-controls="settings" role="tab"#}
+                {#                                           data-toggle="tab">第四类</a></li>#}
+            </ul>
+
+            <!-- Tab panes -->
+            <div class="tab-content">
+                {#                <div role="tabpanel" class="tab-pane active" id="home">1</div>#}
+                {% for i in xdata %}
+                    <div role="tabpanel" class="tab-pane" id="{{ i[0] }}">
+                        <form enctype=multipart/form-data>
+                            {% for j in i[1] %}
+                                <br>
+                                <td><h2 class="title">{{ j[0]['title'] }}</h2></td><br>
+                                <td>{{ j[0]['createTime'] }}</td>
+                                <td>来源：{{ j[0]['source'] }}</td>
+                                <td>作者：{{ j[0]['auther'] }}</td>
+                                <div class="longtext" style="width: 1000px;">
+                                    <td id="content">{{ j[0]['content'] }}</td>
+                                </div>
+                                {% if j[0]['source'] =="微信公众号" %}
+                                    <td><a href="{{ url_for('main.snapshoot', ObjectId =j[0]['_id']) }}">快照</a></td>
+                                {% endif %}
+                                {% if j[0]['source'] != "微信公众号" %}
+                                    <td><a href="{{ j[0]['url'] }}">原文链接</a></td>
+                                {% endif %}
+                                </tr>
+                                <br>
+                            {% endfor %}
+                        </form>
+                    </div>
+                {% endfor %}
+                {#                <div role="tabpanel" class="tab-pane" id="messages">3</div>#}
+                {#                <div role="tabpanel" class="tab-pane" id="settings">4</div>#}
             </div>
-        {% endif %}
+
+        </div>
     </div>
-    </br>
+    <script>
+        $('#myTabs a').click(function (e) {
+            e.preventDefault()
+            $(this).tab('show')
+        })
+    </script>
+
+
 {% endblock %}

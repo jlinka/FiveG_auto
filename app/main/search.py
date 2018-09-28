@@ -194,7 +194,8 @@ def findObjectId(keywords):
 
 
 if __name__ == '__main__':
-    a = searchCondition("3GPP", "", "", "", "")
+    # a = searchCondition("3GPP", "", "", "", "")
+    a = searchAll()
     kmeans_search_condition(a)
 
     # a = db.findSource()

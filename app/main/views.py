@@ -8,6 +8,7 @@ from . import main
 from flask import render_template, redirect, request, url_for, session
 from app.form import Search, NewsForm
 from app.main.search import searchAll, PaginateLeave, searchCondition, searchWeb, searchOfficialAccounts, findObjectId
+from app.main.complex_search import kmeans_search_condition
 
 
 @main.route('/searchNews', methods=['GET', 'POST'])
@@ -44,6 +45,14 @@ def search():
         session['keywords'] = keywords
         session['web'] = web
         session['auther'] = auther
+        if order == "智能排序":
+            cursor = searchCondition(keywords, source, web, auther, order)
+            classifi, xdata = kmeans_search_condition(cursor)
+            xdata = sorted(xdata.items(), key=lambda k: k[0])
+            return render_template('capacity_search.html', newsform=newsform, classifi=classifi, xdata=xdata,
+                                   keywords=keywords,
+                                   web=searchWeb(), officialAccounts=searchOfficialAccounts(), session=session)
+
         if keywords == "" and len(source) == 0:  # 判断搜索条件为空时，显示全部新闻内容
             if web or auther:
                 pagination = PaginateLeave(page, searchCondition(keywords, source, web, auther, order))

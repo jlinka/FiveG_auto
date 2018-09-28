@@ -6,27 +6,18 @@
 
 
 import pandas as pd
-import os
-from pymongo import MongoClient
-from sklearn import feature_extraction
 from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.decomposition import PCA
 from sklearn.cluster import KMeans
-from sklearn.manifold import TSNE
-
-# 显示中文
-import datetime
-import numpy
-import sys
-import codecs
-import jieba
+from collections import defaultdict
+import time
 
 DIMENSION = 128
 
 
 def kmeans_search_condition(cursor):  # 使用条件的kmeans聚类查询
+    start = time.time()
     c = []
     classfi = cursor.count() // 5
     if classfi == 0:
@@ -52,30 +43,36 @@ def kmeans_search_condition(cursor):  # 使用条件的kmeans聚类查询
     print(list(labels))
     print(c)
     i = 0
-    input = open('pca156ttt11111.txt', 'a', encoding='utf-8', errors='ignore')
-    while i < classfi:
-        input.write("第" + str(i) + "类:\n")
-        j = 0
-        while j < cop.count():
-            if labels[j] == i:
-                input.write(cop[j].get('auther') + "\n" + str(cop[j].get("_id")) +
-                            cop[j].get('title') + "\n" + cop[j].get('content').replace('\r', '').replace('\n',
-                                                                                                         '').replace(
-                    ' ',
-                    '').replace(
-                    '  ', '').replace('   ', '') \
-                            .replace('    ', '').replace('     ', '').replace('      ', '').replace('       ',
-                                                                                                    '').replace(
-                    '        ',
-                    '') \
-                            .replace('         ', '').replace('          ', '').replace(
-                    '\r\n            \r\n              \r\n    \r\n    '
-                    '        \r\n           \r\n    ', '') \
-                            .replace(
-                    '\r\n                         \r\n                              \r\n                                '
-                    '   ', '').replace('	', '').replace('　　', '').replace('', '').replace('　　 ', '') + "\n\n")
-            j += 1
-        i += 1
-        input.write("\n\n\n\n\n\n\n")
+    kdata = []
+    s = list(labels)
+    d = defaultdict(list)
+    for k, va in [(v, i) for i, v in enumerate(s)]:
+        d[k].append([{"title": cop[va].get("title"), "createTime": cop[va].get("createTime"),
+                      "source": cop[va].get("source"), "auther": cop[va].get("auther"),
+                      "content": cop[va].get("content"), "_id": cop[va].get("_id"), "url": cop[va].get("url")}])
+    end = time.time()
+    print(end - start)
+    print(d)
+    return classfi, d
+    # ndict = {}
+    # for i in range(classfi):
+    #     ndict[i] = []
+    #     for j in d[i]:
+    #         ndict[i].append([{"title": cop[j].get("title")}, {"createTime": cop[j].get("createTime")},
+    #                          {"source": cop[j].get("source")}, {"auther": cop[j].get("auther")},
+    #                          {"content": cop[j].get("content")}])
+    #     kdata.append(ndict)
 
-    input.close()
+    # while i < classfi:
+    #     j = 0
+    #     ndict = {}
+    #     ndict[i] = []
+    #     while j < cop.count():
+    #         if labels[j] == i:
+    #             ndict[i].append([{"title": cop[j].get("title")}, {"createTime": cop[j].get("createTime")},
+    #                             {"source": cop[j].get("source")}, {"auther": cop[j].get("auther")},
+    #                             {"content": cop[j].get("content")}])
+    #         j += 1
+    #     kdata.append(ndict)
+    #     i += 1
+    print("test")
